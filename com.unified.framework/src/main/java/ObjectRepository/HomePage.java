@@ -3,6 +3,7 @@ package ObjectRepository;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
 
+import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.pagefactory.AndroidFindBy;
@@ -10,15 +11,18 @@ import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 import io.appium.java_client.pagefactory.iOSXCUITFindBy;
 
 public class HomePage {
-	IOSDriver driver;
-	AndroidDriver adriver;
+	AppiumDriver driver;
+
 	@iOSXCUITFindBy(iOSClassChain = "**/XCUIElementTypeStaticText[`label == \"Search for  \"`]")
+	@AndroidFindBy(id = "searchBox")
 	private WebElement search;
 	
 	@iOSXCUITFindBy(accessibility = "Search 20000+ products")
+	@AndroidFindBy(className = "android.widget.EditText")
 	private WebElement searchfield;
 	
 	@iOSXCUITFindBy(xpath = "(//XCUIElementTypeStaticText[@name=\"Chocolate\"])[1]")
+	@AndroidFindBy(xpath = "(//android.view.View[@content-desc=\"Chocolate\"])[1]")
 	private WebElement item;
 	
 	
@@ -35,7 +39,7 @@ public class HomePage {
 		return item;
 	}
 	
-	public HomePage(IOSDriver driver) {
+	public HomePage(AppiumDriver driver) {
 		PageFactory.initElements(new AppiumFieldDecorator(driver),this);
 	}
 	

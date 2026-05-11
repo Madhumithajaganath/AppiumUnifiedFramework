@@ -1,107 +1,237 @@
 package genericUtilities;
+ import java.util.Set;
+ import org.openqa.selenium.ScreenOrientation;
+ import io.appium.java_client.AppiumBy;
+ import io.appium.java_client.AppiumDriver;
+ import io.appium.java_client.android.AndroidDriver;
+ import io.appium.java_client.appmanagement.ApplicationState;
+ import io.appium.java_client.ios.IOSDriver;
 
-import java.time.Duration;
-import java.util.Set;
+    public class DriverUtility {
 
-import org.openqa.selenium.ScreenOrientation;
+        AppiumDriver driver;
 
-import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.HasDeviceTime;
-import io.appium.java_client.HasOnScreenKeyboard;
-import io.appium.java_client.HidesKeyboard;
-import io.appium.java_client.InteractsWithApps;
-import io.appium.java_client.LocksDevice;
-import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.remote.SupportsContextSwitching;
-import io.appium.java_client.remote.SupportsRotation;
+        public DriverUtility(AppiumDriver driver) {
+            this.driver = driver;
+        }
 
-public class DriverUtility {
+        // Install App
+        public void installApp(String path) {
 
-	AppiumDriver driver;
-	public DriverUtility(AppiumDriver driver) {
-		this.driver=driver;
-	}
-		public void installApp(String path){
-			((InteractsWithApps) driver).installApp(path);
-		}
+            if(driver instanceof AndroidDriver) {
+                ((AndroidDriver) driver).installApp(path);
+            }
+            else if(driver instanceof IOSDriver) {
+                ((IOSDriver) driver).installApp(path);
+            }
+        }
 
-		public void activateApp(String Package) {
-			((InteractsWithApps) driver).activateApp(Package);
-		}
-	  
-		public void closeApp(String Package) {
-			((InteractsWithApps) driver).terminateApp(Package);
-		}
+        // Launch App
+        public void launchApp(String appPackage_BundleId) {
 
-		public void isAppInstalled(String Package) {
-			System.out.println(((InteractsWithApps) driver).isAppInstalled(Package));
-		}
-	  
-		public void isDeviceLocked() {
-			System.out.println(((LocksDevice) driver).isDeviceLocked());
-		}
-	  
-		public void isKeyboardShown() {
-			System.out.println(((HasOnScreenKeyboard) driver).isKeyboardShown());
-		}
+            if (driver instanceof AndroidDriver) {
 
-		public void changeOrientationToPotriat() {
-			ScreenOrientation screen = ((SupportsRotation) driver).getOrientation();
-			((SupportsRotation) driver).rotate(screen.PORTRAIT);
-		}
-		
-		public void changeOrientationLandscape() {
-			ScreenOrientation screen = ((SupportsRotation) driver).getOrientation();
-			((SupportsRotation) driver).rotate(screen.LANDSCAPE);
-		}
+                AndroidDriver androidDriver = (AndroidDriver) driver;
+                androidDriver.activateApp(appPackage_BundleId);
 
-		public void lockDevice(int sec) {
-		  ((LocksDevice) driver).lockDevice(Duration.ofSeconds(sec));
-		}
-	  
-		public void unlockDevice() {
-		  ((LocksDevice) driver).unlockDevice();
-		}
-	  
-		public void runAppInBackground(int sec) {
-		  ((InteractsWithApps) driver).runAppInBackground(Duration.ofSeconds(sec));
+            } else if (driver instanceof IOSDriver) {
 
-		}
-		
-		public void deviceTime() {
-		  System.out.println(((HasDeviceTime) driver).getDeviceTime());
-		}
-		
-		public void deviceTime(String format) {
-			  System.out.println(((HasDeviceTime) driver).getDeviceTime(format));
-			}
-		
-		public void openNotifications() {
-	        ((AndroidDriver) driver).openNotifications();
-		}
-		
-		public void hideKeyboard() {
-	        ((HidesKeyboard) driver).hideKeyboard();
-		}
-		
-		public void deleteApp(String Package) {
-		   ((InteractsWithApps) driver).removeApp(Package);
-		}
-		
-		public void get(String url) {
-			driver.get(url);
-		}
-		
-		public void switchContext() {
-			Set<String> ch = ((SupportsContextSwitching) driver).getContextHandles();
-			 int count=ch.size();
-			 System.out.println(count);
-			 for (String c : ch) {
-				System.out.println(ch);
-				
-				if(ch.contains("WEBVIEW_")) {
-					((SupportsContextSwitching) driver).context(c);
-				}
-		 }
-	}
-}
+                IOSDriver iosDriver = (IOSDriver) driver;
+                iosDriver.activateApp(appPackage_BundleId);
+            }
+        }
+
+        // Check App Installed
+        public boolean isAppInstalled(String appPackage) {
+
+            if(driver instanceof AndroidDriver) {
+                return ((AndroidDriver) driver).isAppInstalled(appPackage);
+            }
+            else if(driver instanceof IOSDriver) {
+                return ((IOSDriver) driver).isAppInstalled(appPackage);
+            }
+
+            return false;
+        }
+
+        // Close App
+        public void closeApp(String appPackage) {
+
+            if(driver instanceof AndroidDriver) {
+                ((AndroidDriver) driver).terminateApp(appPackage);
+            }
+            else if(driver instanceof IOSDriver) {
+                ((IOSDriver) driver).terminateApp(appPackage);
+            }
+        }
+
+        // Delete App
+        public void deleteApp(String appPackage) {
+
+            if(driver instanceof AndroidDriver) {
+                ((AndroidDriver) driver).removeApp(appPackage);
+            }
+            else if(driver instanceof IOSDriver) {
+                ((IOSDriver) driver).removeApp(appPackage);
+            }
+        }
+    
+
+            // Open Notification (Android only)
+            public void openNotification() {
+
+                if (driver instanceof AndroidDriver) {
+
+                    AndroidDriver androidDriver = (AndroidDriver) driver;
+                    androidDriver.openNotifications();
+
+                } 
+            }
+         // Toast Message for Android & iOS
+            public void toastMessage() {
+
+                if (driver instanceof AndroidDriver) {
+
+                    AndroidDriver androidDriver = (AndroidDriver) driver;
+
+                    String message = androidDriver
+                            .findElement(AppiumBy.xpath("//android.widget.Toast")).getText();
+                          
+
+                    System.out.println("Android Toast Message : " + message);
+                }
+
+                else if (driver instanceof IOSDriver) {
+
+                    IOSDriver iosDriver = (IOSDriver) driver;
+
+                    String message = iosDriver
+                            .findElement(AppiumBy.xpath("//XCUIElementTypeStaticText"))
+                            .getText();
+
+                    System.out.println("iOS Toast Message : " + message);
+                }
+            }
+
+            // Clipboard (works differently for Android & iOS)
+            public void saveInClipBoard(String message) {
+
+                if (driver instanceof AndroidDriver) {
+
+                    AndroidDriver androidDriver = (AndroidDriver) driver;
+                    androidDriver.setClipboardText(message);
+
+                } else if (driver instanceof IOSDriver) {
+
+                    IOSDriver iosDriver = (IOSDriver) driver;
+                    iosDriver.setClipboardText(message);
+                }
+            }
+
+            public String getInClipBoard() {
+
+                if (driver instanceof AndroidDriver) {
+
+                    AndroidDriver androidDriver = (AndroidDriver) driver;
+                    return androidDriver.getClipboardText();
+
+                } else if (driver instanceof IOSDriver) {
+
+                    IOSDriver iosDriver = (IOSDriver) driver;
+                    return iosDriver.getClipboardText();
+                }
+
+                return null;
+            }
+
+        
+            // Screen Rotation
+            public void screenPortrait() {
+
+                if (driver instanceof AndroidDriver) {
+                    ((AndroidDriver) driver).rotate(ScreenOrientation.PORTRAIT);
+                } else if (driver instanceof IOSDriver) {
+                    ((IOSDriver) driver).rotate(ScreenOrientation.PORTRAIT);
+                }
+            }
+
+            public void screenLandscape() {
+
+                if (driver instanceof AndroidDriver) {
+                    ((AndroidDriver) driver).rotate(ScreenOrientation.LANDSCAPE);
+                } else if (driver instanceof IOSDriver) {
+                    ((IOSDriver) driver).rotate(ScreenOrientation.LANDSCAPE);
+                }
+            }
+
+
+        // App Status
+        public void appStatus(String appPackage) {
+
+            if (driver instanceof AndroidDriver) {
+
+                AndroidDriver androidDriver = (AndroidDriver) driver;
+                ApplicationState state = androidDriver.queryAppState(appPackage);
+                System.out.println("Android App State : " + state);
+
+            } else if (driver instanceof IOSDriver) {
+
+                IOSDriver iosDriver = (IOSDriver) driver;
+                ApplicationState state = iosDriver.queryAppState(appPackage);
+                System.out.println("iOS App State : " + state);
+            }
+        }
+
+       
+        // Hide Keyboard
+        public void hideKeyboard() {
+
+            if (driver instanceof AndroidDriver) {
+
+                AndroidDriver androidDriver = (AndroidDriver) driver;
+                androidDriver.hideKeyboard();
+
+            } else if (driver instanceof IOSDriver) {
+
+                IOSDriver iosDriver = (IOSDriver) driver;
+                iosDriver.hideKeyboard();
+            }
+        }
+        
+        
+     // Context Handling (Hybrid Apps) for Android & iOS
+        public void contextHandles(String partialValue) throws InterruptedException {
+
+            if (driver instanceof AndroidDriver) {
+                AndroidDriver androidDriver = (AndroidDriver) driver;
+                Set<String> contexts = androidDriver.getContextHandles();
+                for (String ch : contexts) {
+                    System.out.println("Android Context : " + ch);
+                    if (ch.contains(partialValue)) {
+                        androidDriver.context(ch);
+                        Thread.sleep(3000);
+                        break;
+                    }
+                }
+
+                String title = androidDriver.getTitle();
+                System.out.println("Page Title : " + title);
+            }
+
+            else if (driver instanceof IOSDriver) {
+                IOSDriver iosDriver = (IOSDriver) driver;
+                Set<String> contexts = iosDriver.getContextHandles();
+                for (String ch : contexts) {
+                    System.out.println("iOS Context : " + ch);
+                    if (ch.contains(partialValue)) {
+                        iosDriver.context(ch);
+                        Thread.sleep(3000);
+                        break;
+                    }
+                }
+                String title = iosDriver.getTitle();
+                System.out.println("Page Title : " + title);
+            }
+        }
+    }
+
